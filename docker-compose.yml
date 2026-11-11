@@ -1,0 +1,45 @@
+# Local development stack: Postgres + the API.
+#   docker compose up --build
+#   open http://localhost:8000/docs
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: citedqa
+      POSTGRES_PASSWORD: citedqa
+      POSTGRES_DB: citedqa
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # The API must not start before Postgres accepts connections, or it
+      # crash-loops on boot. This healthcheck is what `depends_on: condition:
+      # service_healthy` waits for.
+      test: ["CMD-SHELL", "pg_isready -U citedqa -d citedqa"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ENVIRONMENT: staging
+      DATABASE_URL: postgresql+asyncpg://citedqa:citedqa@db:5432/citedqa
+      JWT_SECRET: compose-only-secret-not-for-production
+      LLM_PROVIDER: fake
+      CORS_ALLOW_ORIGINS: '["http://localhost:5173"]'
+    ports:
+      - "8000:8000"
+    # Migrations run as an explicit step BEFORE the server starts - never
+    # inside the app's startup hook, where N replicas would race on the same DDL.
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2"
+
+volumes:
+  pgdata:

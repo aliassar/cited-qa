@@ -1,0 +1,20 @@
+# ---------------------------------------------------------------------------
+# Runtime dependencies.
+#
+# Lower bounds only. For reproducible deployments, generate a lockfile from
+# this file (uv / pip-compile) and install from that, so the image you test is
+# the image you deploy.
+# ---------------------------------------------------------------------------
+
+fastapi>=0.115            # the web framework (ASGI, Pydantic-native)
+uvicorn[standard]>=0.32   # ASGI server; [standard] pulls uvloop + httptools (faster event loop)
+pydantic[email]>=2.9      # validation / serialisation (v2 = Rust core); [email] adds EmailStr
+pydantic-settings>=2.5    # 12-factor config: env vars -> typed Settings object
+SQLAlchemy[asyncio]>=2.0.36  # ORM + Core; [asyncio] pulls greenlet, required by the async engine
+aiosqlite>=0.20           # async SQLite driver (used for local dev + tests)
+alembic>=1.13             # database migrations
+PyJWT>=2.9                # JWT encode/decode (access + refresh tokens)
+bcrypt>=4.2               # password hashing (deliberately slow KDF)
+python-multipart>=0.0.12  # required by FastAPI to parse multipart/form-data uploads
+httpx>=0.27               # async HTTP client (also used by the test client)
+anthropic>=0.40           # official Claude SDK (only needed if you enable the real LLM)

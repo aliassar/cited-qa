@@ -1,0 +1,23 @@
+# Ruff replaces flake8 + isort + black + pyupgrade in one fast binary.
+line-length = 100
+target-version = "py311"
+
+[lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes: unused imports, undefined names
+    "I",        # isort: import ordering
+    "B",        # flake8-bugbear: likely bugs (mutable default args, etc.)
+    "UP",       # pyupgrade: modernise syntax
+    "ASYNC",    # flake8-async: blocking calls inside async functions
+    "S",        # bandit: basic security lints
+]
+ignore = [
+    "E501",  # line length is handled by the formatter
+    "B008",  # FastAPI's Depends() in defaults is idiomatic, not a bug
+]
+
+[lint.per-file-ignores]
+# Tests legitimately use `assert` (S101) and hard-coded demo passwords (S105/S106).
+"tests/*" = ["S101", "S105", "S106"]
+"scripts/*" = ["S105", "S106"]

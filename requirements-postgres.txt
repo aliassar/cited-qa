@@ -1,0 +1,4 @@
+# Postgres driver, kept separate because it needs a C toolchain to build on
+# very new CPython versions. Install this in Docker / CI where you use Postgres.
+-r requirements.txt
+asyncpg>=0.30
